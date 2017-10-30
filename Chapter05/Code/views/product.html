@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CI Web Shop</title>
+        
+        <link rel="stylesheet" type="text/css" href="..\node_modules\bootstrap\dist\css\bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="..\css\layout.css">
+        <script src="..\node_modules\angular\angular.js"></script>
+        <script src="..\node_modules\jquery\dist\jquery.js"></script>
+        <script src="..\node_modules\bootstrap\dist\js\bootstrap.js"></script>
+        <script src="..\scripts\utils.js"></script>
+        <script src="..\scripts\repository.js"></script>
+        <script src="..\scripts\product.js"></script>
+    </head>
+    <body ng-app="shopApp">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="..\index.html">CI Web Shop</a>
+                </div>
+                <div class="collapse navbar-collapse" id="menu">
+                    <ul class="nav navbar-nav navbar-right">
+                        <li><a href="#"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+                        <li><a href="shopping-cart.html"><span class="glyphicon glyphicon-shopping-cart"></span> Order</a></li>
+                    </ul>
+                    <div class="navbar-form navbar-right">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Search" ng-model="query">
+                        </div>
+                        <a href="search.html?q={{query}}" class="btn btn-default">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="container" ng-controller="productController">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2>{{name}}</h2>
+                    <p>
+                        <img src="http://placehold.it/300x300" alt="..." />
+                    </p>
+                    <p>{{description}}</p>
+                    <p>{{'&euro; ' + price}}</p>
+                    <p>
+                        <a href="shopping-cart.html" class="btn btn-primary">Buy</a>
+                    </p>
+                </div>
+            </div>
+            <footer class="footer">
+                <p>Copyright &copy; 2017</p>
+            </footer>
+        </div>
+    </body>
+</html>

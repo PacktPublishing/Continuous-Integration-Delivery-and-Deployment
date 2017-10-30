@@ -1,0 +1,164 @@
+pipeline {
+  agent any
+  
+  options {
+    gitLabConnection('Local GitLab')
+    buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+  }
+  
+  triggers {
+    gitlab(triggerOnPush: true, branchFilterType: 'All')
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: 'web-shop-pipeline') {
+            checkout scm
+            sh 'npm install'
+          }
+        }
+      }
+    }
+    stage('Build') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: 'web-shop-pipeline') {
+            gitlabCommitStatus(name: 'Build') {
+              sh 'node_modules/.bin/gulp --env=prod --browsers=PhantomJS'
+              stash(name: 'Everything', excludes: 'node_modules/**', includes: '**/**')
+            }
+          }
+        }
+      }
+    }
+    stage('Test NodeJS') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: 'web-shop-pipeline') {
+            gitlabCommitStatus(name: 'Test NodeJS') {
+              sh 'node_modules/.bin/istanbul cover node_modules/jasmine-node/bin/jasmine-node -- --junitreport --output node-junit test/spec'
+              junit 'node-junit/*.xml'
+              publishHTML target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: false,
+                reportDir: 'coverage/lcov-report',
+                reportFiles: 'index.html',
+                reportName: 'NodeJS Coverage Report'
+              ]
+            }
+          }
+        }
+      }
+    }
+    stage('Test') {
+      steps {
+        parallel(
+          "Test Chrome": {
+            node(label: 'windows') {
+              ws(dir: 'web-shop-pipeline') {
+                gitlabCommitStatus(name: 'Test Chrome') {
+                  unstash 'Everything'
+                  bat 'npm install && node_modules\\.bin\\gulp.cmd test-min --env=prod --browsers=Chrome'
+                  junit 'test/junit/*.xml'
+                  publishHTML target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: false,
+                    reportDir: 'test/coverage/html',
+                    reportFiles: 'index.html',
+                    reportName: 'Coverage Report'
+                  ]
+                }
+              }
+            }
+          },
+          "Test IE": {
+            node(label: 'windows') {
+              gitlabCommitStatus(name: 'Test IE') {
+                unstash 'Everything'
+                bat 'npm install && node_modules\\.bin\\gulp.cmd test-min --env=prod --browsers=IE'
+                junit 'test/junit/*.xml'
+              }
+            }
+          },
+          "Test Firefox": {
+            node(label: 'windows') {
+              gitlabCommitStatus(name: 'Test Firefox') {
+                unstash 'Everything'
+                bat 'npm install && node_modules\\.bin\\gulp.cmd test-min --env=prod --browsers=Firefox'
+                junit 'test/junit/*.xml'
+              }
+            }
+          }
+        )
+      }
+    }
+    stage('SonarQube') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: 'web-shop-pipeline') {
+            gitlabCommitStatus(name: 'SonarQube') {
+              script {
+                def sonar = tool name: 'Local', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+              
+                withSonarQubeEnv {
+                  sh sonar + '/bin/sonar-scanner'
+                }
+                
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    stage('Selenium') {
+      steps {
+        node(label: 'windows') {
+          ws(dir: 'web-shop-pipeline') {
+            gitlabCommitStatus(name: 'Selenium') {
+              script {
+                try {
+                  bat 'node_modules\\.bin\\webdriver-manager.cmd update'
+                  bat 'node_modules\\.bin\\pm2.cmd start --name=jenkins index.js -- --port=1234'
+                  bat 'node_modules\\.bin\\protractor.cmd --baseUrl http://localhost:1234 test\\protractor.conf.js'
+                } finally {
+                  bat 'node_modules\\.bin\\pm2.cmd delete -s jenkins'
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+    stage('Archiving Artifacts') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: 'web-shop-pipeline') {
+            archiveArtifacts 'prod/, node_modules/bootstrap/dist/css/bootstrap.min.css, node_modules/angular/angular.min.js, node_modules/bootstrap/dist/js/bootstrap.min.js, node_modules/jquery/dist/jquery.min.js'
+          }
+        }
+      }
+    }
+  }
+  post {
+    failure {
+      mail body: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+           Check console output at ${env.BUILD_URL}""",
+           subject: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+           to: 'sander.rossel@gmail.com'
+    }
+    changed {
+        mail body: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+             Check console output at ${env.BUILD_URL}""",
+             subject: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+             to: 'sander.rossel@gmail.com'
+    }
+  }
+}

@@ -1,0 +1,30 @@
+<nav class="navbar navbar-default navbar-fixed-top">
+    <div class="container">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu">
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="index.html">CI Web Shop</a>
+        </div>
+        <div class="collapse navbar-collapse" id="menu">
+            <ul class="nav navbar-nav navbar-right">
+                <% if (authenticated) {%>
+                    <li><a href="logout.html"><span class="glyphicon glyphicon-off"></span> Logout <%= username %></a></li>
+                <% } else { %>
+                    <li><a href="login.html"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+                <% } %>
+                <li><a href="shopping-cart.html"><span class="glyphicon glyphicon-shopping-cart"></span> Order</a></li>
+            </ul>
+            <div class="navbar-form navbar-right">
+                <div class="form-group">
+                    <input class="form-control" placeholder="Search" ng-model="query">
+                </div>
+                <a id="search-btn" href="search.html?q={{query}}" class="btn btn-default">
+                    <span class="glyphicon glyphicon-search"></span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>

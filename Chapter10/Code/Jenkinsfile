@@ -1,0 +1,76 @@
+pipeline {
+  agent any
+  
+  options {
+    gitLabConnection('Local GitLab')
+  }
+    
+  triggers {
+    gitlab(triggerOnPush: true, branchFilterType: 'All')
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: 'web-shop-pipeline') {
+            sh 'npm install'
+          }
+        }
+      }
+    }
+    stage('Build') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: 'web-shop-pipeline') {
+            gitlabCommitStatus(name: 'Build') {
+              sh 'node_modules/.bin/gulp --env=prod --browsers=PhantomJS'
+              stash(name: 'Everything', excludes: 'node_modules/**', includes: '**/**')
+            }
+          }
+        }
+      }
+    }
+    stage('Test') {
+      steps {
+        parallel(
+          "Test Chrome": {
+            node(label: 'windows') {
+              gitlabCommitStatus(name: 'Test Chrome') {
+                unstash 'Everything'
+                bat 'npm install && node_modules\\.bin\\gulp.cmd test-min --env=prod --browsers=Chrome'
+                junit 'test/junit/*.xml'
+                publishHTML target: [
+                  allowMissing: false,
+                  alwaysLinkToLastBuild: false,
+                  keepAll: false,
+                  reportDir: 'test/coverage/html',
+                  reportFiles: 'index.html',
+                  reportName: 'Coverage Report'
+                ]
+              }
+            }
+          },
+          "Test IE": {
+            node(label: 'windows') {
+              gitlabCommitStatus(name: 'Test IE') {
+                unstash 'Everything'
+                bat 'npm install && node_modules\\.bin\\gulp.cmd test-min --env=prod --browsers=IE'
+                junit 'test/junit/*.xml'
+              }
+            }
+          },
+          "Test Firefox": {
+            node(label: 'windows') {
+              gitlabCommitStatus(name: 'Test Firefox') {
+                unstash 'Everything'
+                bat 'npm install && node_modules\\.bin\\gulp.cmd test-min --env=prod --browsers=Firefox'
+                junit 'test/junit/*.xml'
+              }
+            }
+          }
+        )
+      }
+    }
+  }
+}

@@ -1,0 +1,7 @@
+**/bin/**
+**/obj/**
+**/TestResults/**
+**/node_modules/**
+**/bundles/**
+**/wwwroot/lib/**
+**/site.min.css

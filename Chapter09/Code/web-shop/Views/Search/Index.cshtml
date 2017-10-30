@@ -1,0 +1,37 @@
+@{
+    ViewData["ngController"] = "searchController";
+}
+@section Scripts {
+<environment names="Development">
+    <script src="~/js/bundles/search.bundle.debug.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <script src="~/js/bundles/search.bundle.js"></script>
+</environment>
+}
+<div ng-repeat="product in results">
+    <div class="thumbnail">
+        <div class="row">
+            <div class="col-lg-2">
+                <a href="@Url.Action("Index", "Product")?id={{product.id}}">
+                    <img src="http://placehold.it/150x150" alt="..." />
+                </a>
+            </div>
+            <div class="col-lg-9">
+                <div class="caption">
+                    <a href="@Url.Action("Index", "Product")?id={{product.id}}">
+                        <h3 class="wrap" title="{{product.name}}">{{product.name}}</h3>
+                    </a>
+                    <p class="label label-default">{{product.category}}</p>
+                    <p class="wrap">{{product.description}}</p>
+                </div>
+            </div>
+            <div class="col-lg-1 clearfix">
+                <div class="caption pull-right">
+                    <p>{{'&euro; ' + product.price}}</p>
+                    <button ng-click="addToCart(product)" class="btn btn-primary pull-right">Buy</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

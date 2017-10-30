@@ -1,0 +1,59 @@
+@using Microsoft.AspNetCore.Http;
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CI Web Shop</title>
+        <link rel="shortcut icon" href="https://www.packtpub.com/favicon.ico">
+        
+        <link rel="stylesheet" type="text/css" href="~/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" type="text/css" href="~/css/site.min.css">
+        
+        <script src="~/lib/jquery/dist/jquery.js"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="~/lib/angular/angular.js"></script>
+        @RenderSection("Scripts", required: false)
+    </head>
+    <body ng-app="shopApp">
+        <nav class="navbar navbar-default navbar-fixed-top">
+            <div class="container">
+                <div class="navbar-header">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#menu">
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                        <span class="icon-bar"></span>
+                    </button>
+                    <a class="navbar-brand" href="@Url.Action("Index", "Home")">CI Web Shop</a>
+                </div>
+                <div class="collapse navbar-collapse" id="menu">
+                    <ul class="nav navbar-nav navbar-right">
+                        @if (Context.Session.GetString("IsAuthenticated") == bool.TrueString)
+                        {
+                            <li><a href="@Url.Action("Logout", "Login")"><span class="glyphicon glyphicon-off"></span> Logout @(Context.Session.GetString("Username"))</a></li>
+                        }
+                        else
+                        {
+                            <li><a href="@Url.Action("Index", "Login")"><span class="glyphicon glyphicon-user"></span> Login</a></li>
+                        }
+                        <li><a href="@Url.Action("Index", "ShoppingCart")"><span class="glyphicon glyphicon-shopping-cart"></span> Order</a></li>
+                    </ul>
+                    <div class="navbar-form navbar-right">
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Search" ng-model="query">
+                        </div>
+                        <a id="search-btn" href="@Url.Action("Index", "Search")?q={{query}}" class="btn btn-default">
+                            <span class="glyphicon glyphicon-search"></span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <div class="container" ng-controller="@ViewData["ngController"]">
+            @RenderBody()
+            <footer class="footer">
+                <p>Copyright &copy; 2017</p>
+            </footer>
+        </div>
+    </body>
+</html>

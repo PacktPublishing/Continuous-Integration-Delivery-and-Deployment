@@ -1,0 +1,28 @@
+{
+  "name": "web-shop",
+  "version": "1.0.0",
+  "description": "A simple web shop for the CI example.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node_modules/.bin/istanbul.cmd cover node_modules/jasmine-node/bin/jasmine-node -- --junitreport --output node-junit test/spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "http://ciserver/sander/web-shop.git"
+  },
+  "author": "Sander Rossel",
+  "license": "ISC",
+  "dependencies": {},
+  "devDependencies": {
+    "bower": "^1.8.0",
+    "browserify": "^14.1.0",
+    "event-stream": "^3.3.4",
+    "glob": "^7.1.1",
+    "gulp": "^3.9.1",
+    "gulp-minify": "^1.0.0",
+    "gulp-rename": "^1.2.2",
+    "gulp-size": "^2.1.0",
+    "vinyl-buffer": "^1.0.0",
+    "vinyl-source-stream": "^1.1.0"
+  }
+}

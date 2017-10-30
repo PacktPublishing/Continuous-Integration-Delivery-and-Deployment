@@ -1,0 +1,42 @@
+{
+    "version": "0.1.0",
+    "tasks": [
+       {
+            "taskName": "build",
+            "command": "dotnet",
+            "args": ["build"],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "taskName": "bundle",
+            "command": "dotnet",
+            "args": ["bundle"]
+        },
+        {
+            "taskName": "npm",
+            "command": "npm",
+            "isShellCommand": true,
+            "args": ["install"]
+        },
+        {
+            "taskName": "gulp",
+            "command": "gulp",
+            "isShellCommand": true
+        },
+        {
+            "taskName": "test",
+            "command": "dotnet",
+            "isShellCommand": true,
+            "args": ["test", "../web-shop-tests/web-shop-tests.csproj"]
+        },
+        {
+            "taskName": "doItAll",
+            "command": "cmd",
+            "isShellCommand": true,
+            "args": [
+                "/C \"dotnet restore && dotnet build && dotnet bundle && bower install && npm install && gulp\""
+            ],
+            "isBuildCommand": true
+        }
+    ]
+}

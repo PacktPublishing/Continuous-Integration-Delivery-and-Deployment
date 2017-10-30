@@ -1,0 +1,74 @@
+pipeline {
+  agent any
+  
+  options {
+    gitLabConnection('Local GitLab')
+    buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+    disableConcurrentBuilds()
+  }
+  
+  triggers {
+    gitlab(triggerOnPush: true, branchFilterType: 'All')
+  }
+  
+  environment {
+    ws = "web-shop-pipeline-net-${env.BRANCH_NAME}"
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            checkout scm
+            sh '''cd web-shop
+                npm install
+                node_modules/.bin/bower install'''
+          }
+        }
+      }
+    }
+    stage('Build') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            gitlabCommitStatus(name: 'Build') {
+              sh '''cd web-shop
+                  dotnet restore
+                  dotnet build
+                  dotnet bundle
+                  node_modules/.bin/gulp'''
+              stash(name: 'Everything', excludes: 'node_modules/**', includes: '**/**')
+            }
+          }
+        }
+      }
+    }
+    stage('Archiving Artifacts') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            sh 'rm -rf node_modules'
+            sh 'npm install --only=production'
+            sh 'dotnet publish -o ../prod web-shop/web-shop.csproj'
+            archiveArtifacts 'prod/'
+          }
+        }
+      }
+    }
+  }
+  post {
+    failure {
+      mail body: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+           Check console output at ${env.BUILD_URL}""",
+           subject: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+           to: 'sander.rossel@gmail.com'
+    }
+    changed {
+        mail body: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+             Check console output at ${env.BUILD_URL}""",
+             subject: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+             to: 'sander.rossel@gmail.com'
+    }
+  }
+}

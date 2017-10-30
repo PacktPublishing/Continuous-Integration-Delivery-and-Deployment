@@ -1,0 +1,5 @@
+CREATE DATABASE webshop
+   WITH 
+   OWNER = sa
+   ENCODING = 'UTF8'
+   CONNECTION LIMIT = -1;

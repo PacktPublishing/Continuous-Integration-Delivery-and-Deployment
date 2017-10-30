@@ -1,0 +1,21 @@
+{
+  "name": "web-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.17.2",
+    "command-line-args": "^4.0.6",
+    "express": "^4.15.3",
+    "js2xmlparser": "^3.0.0",
+    "path": "^0.12.7"
+  },
+  "devDependencies": {
+    "newman": "^3.7.6"
+  }
+}

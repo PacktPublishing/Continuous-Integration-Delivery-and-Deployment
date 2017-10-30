@@ -1,0 +1,22 @@
+@{
+    ViewData["ngController"] = "productController";
+}
+@section Scripts {
+<environment names="Development">
+    <script src="~/js/bundles/product.bundle.debug.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <script src="~/js/bundles/product.bundle.js"></script>
+</environment>
+}
+<div class="col-lg-12 text-center">
+    <h2>{{product.name}}</h2>
+    <p>
+        <img src="http://placehold.it/300x300" alt="..." />
+    </p>
+    <p>{{product.description}}</p>
+    <p>{{'&euro; ' + product.price}}</p>
+    <p>
+        <button ng-click="addToCart(product)" class="btn btn-primary">Buy</button>
+    </p>
+</div>

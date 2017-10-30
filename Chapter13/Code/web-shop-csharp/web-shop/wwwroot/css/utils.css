@@ -1,0 +1,10 @@
+.wrap {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.center {
+    float: none;
+    margin: 0 auto;
+}

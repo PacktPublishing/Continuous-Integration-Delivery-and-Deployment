@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CI Web Shop</title>
+        <link rel="shortcut icon" href="https://www.packtpub.com/favicon.ico">
+        
+        <!-- build:css -->
+        <link rel="stylesheet" type="text/css" href="..\node_modules\bootstrap\dist\css\bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="..\css\layout.css">
+        <link rel="stylesheet" type="text/css" href="..\css\utils.css">
+        <!-- endbuild -->
+        <!-- build:node_modules -->
+        <script src="..\node_modules\angular\angular.js"></script>
+        <script src="..\node_modules\jquery\dist\jquery.js"></script>
+        <script src="..\node_modules\bootstrap\dist\js\bootstrap.js"></script>
+        <!-- endbuild -->
+        <!-- build:js -->
+        <script src="..\scripts\bundles\search.bundle.js"></script>
+        <!-- endbuild -->
+    </head>
+    <body ng-app="shopApp">
+        <%- include navbar.ejs %>
+        <div class="container" ng-controller="searchController">
+            <div ng-repeat="product in results">
+                <div class="thumbnail">
+                    <div class="row">
+                        <div class="col-lg-2">
+                            <a href="product.html?id={{product.id}}">
+                                <img src="http://placehold.it/150x150" alt="..." />
+                            </a>
+                        </div>
+                        <div class="col-lg-9">
+                            <div class="caption">
+                                <a href="product.html?id={{product.id}}">
+                                    <h3 class="wrap" title="{{product.name}}">{{product.name}}</h3>
+                                </a>
+                                <p class="label label-default">{{product.category}}</p>
+                                <p class="wrap">{{product.description}}</p>
+                            </div>
+                        </div>
+                        <div class="col-lg-1 clearfix">
+                            <div class="caption pull-right">
+                            <p>{{'&euro; ' + product.price}}</p>
+                            <button ng-click="addToCart(product)" class="btn btn-primary pull-right">Buy</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer">
+                <p>Copyright &copy; 2017</p>
+            </footer>
+        </div>
+    </body>
+</html>

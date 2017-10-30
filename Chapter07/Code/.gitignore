@@ -1,0 +1,6 @@
+node_modules/**
+**/junit/**
+**/coverage/**
+**/selenium-junit/**
+prod/**
+**/bundles/**

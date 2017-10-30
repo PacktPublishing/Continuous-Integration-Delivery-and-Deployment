@@ -1,0 +1,54 @@
+﻿@{
+    ViewData["ngController"] = "homeController";
+}
+@section Scripts {
+<environment names="Development">
+    <script src="~/js/bundles/index.bundle.debug.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <script src="~/js/bundles/index.bundle.js"></script>
+</environment>
+}
+<div class="jumbotron">
+    <h1>CI Web Shop</h1>
+    <p class="lead">Welcome to the CI Web Shop!<br />
+    Browse our wares, but remember: if you break it you buy it!</p>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <h2>Search for products...</h2>
+    </div>
+    <div class="col-lg-12">
+        <div class="input-group">
+            <input class="form-control" placeholder="Search for..." ng-model="searchTerm" />
+                <div class="input-group-btn">
+                <a href="@Url.Action("Index", "Search")?q={{searchTerm}}" class="btn btn-default">
+                    <span class="glyphicon glyphicon-search"></span>
+                </a>
+            </div>
+        </div>
+     </div>
+</div>
+<div class="row">
+    <div class="col-lg-12">
+        <h2>Other people bought...</h2>
+    </div>
+    <div ng-repeat="product in topProducts">
+        <div class="col-lg-4">
+            <div class="thumbnail">
+                <a href="@Url.Action("Index", "Product")?id={{product.id}}">
+                    <img src="http://placehold.it/150x150" alt="..." />
+                </a>
+                <div class="caption clearfix">
+                    <a href="@Url.Action("Index", "Product")?id={{product.id}}">
+                        <h3 class="wrap" title="{{product.name}}">{{product.name}}</h3>
+                    </a>
+                    <p>{{'&euro; ' + product.price}}</p>
+                    <p class="clearfix">
+                        <button ng-click="addToCart(product)" class="btn btn-primary pull-right">Buy</button>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

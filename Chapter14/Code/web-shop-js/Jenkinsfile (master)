@@ -1,0 +1,94 @@
+pipeline {
+  agent any
+  
+  options {
+    gitLabConnection('Local GitLab')
+    buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+    disableConcurrentBuilds()
+  }
+  
+  triggers {
+    gitlab(triggerOnPush: true, branchFilterType: 'All')
+  }
+  
+  environment {
+    ws = "web-shop-pipeline-${env.BRANCH_NAME}"
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            checkout scm
+            sh 'npm install'
+          }
+        }
+      }
+    }
+    stage('Build') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            gitlabCommitStatus(name: 'Build') {
+              sh 'node_modules/.bin/gulp --env=prod --browsers=PhantomJS'
+              stash(name: 'Everything', excludes: 'node_modules/**', includes: '**/**')
+            }
+          }
+        }
+      }
+    }
+    stage('Archiving Artifacts') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            sh 'rm -rf node_modules' 
+            sh 'npm install --only=production' 
+            archiveArtifacts 'index.js, config.*.js, prod/, node_modules/'
+          }
+        }
+      }
+    }
+    stage('Deployment') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            unarchive mapping: ['**/**' : './artifacts']
+            sh 'rm -rf /var/www/webshop-js/*'
+            sh 'scp -r artifacts/* jenkins@ciserver:/var/www/webshop-js'
+          }
+        }
+      }
+    }
+    stage('Selenium') {
+      steps {
+        node(label: 'windows') {
+          ws(dir: env.ws) {
+            gitlabCommitStatus(name: 'Selenium') {
+              script {
+                unstash 'Everything'
+                bat 'npm install'
+                bat 'node_modules\\.bin\\webdriver-manager.cmd update'
+                bat 'node_modules\\.bin\\protractor.cmd --baseUrl http://ciserver:8888 test\\protractor.conf.js'
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    failure {
+      mail body: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+           Check console output at ${env.BUILD_URL}""",
+           subject: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+           to: 'sander.rossel@gmail.com'
+    }
+    changed {
+        mail body: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+             Check console output at ${env.BUILD_URL}""",
+             subject: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+             to: 'sander.rossel@gmail.com'
+    }
+  }
+}

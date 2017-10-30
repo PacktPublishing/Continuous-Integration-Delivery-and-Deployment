@@ -1,0 +1,30 @@
+@{
+    ViewData["ngController"] = "loginController";
+}
+@section Scripts {
+<environment names="Development">
+    <script src="~/js/bundles/login.bundle.debug.js"></script>
+</environment>
+<environment names="Staging,Production">
+    <script src="~/js/bundles/login.bundle.js"></script>
+</environment>
+}
+<div class="row">
+    <form ng-submit="login()">
+        <div class="col-lg-3 center text-center">
+            <h2>Login</h2>
+            <p class="bg-danger" ng-show="notFound">User or password were incorrect.</p>
+            <div class="input-group center">
+                <p class="clearfix">
+                    <input class="form-control" placeholder="Username..." ng-model="username" required />
+                </p>
+                <p class="clearfix">
+                    <input type="password" class="form-control" placeholder="Password..." ng-model="password" required />
+                </p>
+            </div>
+            <p class="clearfix">
+                <input type="submit" class="btn btn-success" value="Login" />
+            </p>
+        </div>
+    </form>
+</div>

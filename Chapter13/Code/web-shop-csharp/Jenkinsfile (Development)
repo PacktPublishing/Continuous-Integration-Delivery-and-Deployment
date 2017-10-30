@@ -1,0 +1,134 @@
+pipeline {
+  agent any
+  
+  options {
+    gitLabConnection('Local GitLab')
+    buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
+    disableConcurrentBuilds()
+  }
+  
+  triggers {
+    gitlab(triggerOnPush: true, branchFilterType: 'All')
+  }
+  
+  environment {
+    ws = "web-shop-pipeline-net-${env.BRANCH_NAME}"
+  }
+  
+  stages {
+    stage('Checkout') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            checkout scm
+            sh '''cd web-shop
+                npm install
+                node_modules/.bin/bower install'''
+          }
+        }
+      }
+    }
+    stage('Build') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            gitlabCommitStatus(name: 'Build') {
+              sh '''cd web-shop
+                  dotnet restore
+                  dotnet build
+                  dotnet bundle
+                  node_modules/.bin/gulp'''
+              stash(name: 'Everything', excludes: 'node_modules/**', includes: '**/**')
+            }
+          }
+        }
+      }
+    }
+    stage('Test') {
+      steps {
+        parallel(
+          "Test": {
+            node(label: 'windows') {
+              ws(dir: env.ws) {
+                gitlabCommitStatus(name: 'Test') {
+                  unstash 'Everything'
+                  bat 'cd web-shop-tests && dotnet restore && (if not exist TestResults mkdir TestResults) && "C:\\Program Files (x86)\\OpenCover\\OpenCover.Console.exe" -target:"C:\\Program Files\\dotnet\\dotnet.exe" -targetargs:"test -l "trx;LogFileName=result.trx"" -register -filter:"+[web-shop]* -[web-shop-tests]*" -output:"TestResults\\OpenCover Coverage.xml" -oldStyle && OpenCoverToCoberturaConverter.exe -input:"TestResults\\OpenCover Coverage.xml" -output:TestResults\\Cobertura.xml && ReportGenerator\\ReportGenerator.exe -reports:"TestResults\\OpenCover Coverage.xml" -targetDir:TestResults\\CoverageHTML'
+                  
+                  bat 'msxsl -o JUnitResults.xml web-shop-tests\\TestResults\\result.trx trx-to-junit.xsl'
+                  junit 'JUnitResults.xml'
+                  
+                  publishHTML target: [
+                    allowMissing: false,
+                    alwaysLinkToLastBuild: false,
+                    keepAll: false,
+                    reportDir: 'web-shop-tests/TestResults/CoverageHTML',
+                    reportFiles: 'index.htm',
+                    reportName: 'Coverage Report'
+                  ]
+                  step([$class: 'CoberturaPublisher',
+                    autoUpdateHealth: false,
+                    autoUpdateStability: false,
+                    coberturaReportFile: 'web-shop-tests/TestResults/Cobertura.xml',
+                    failUnhealthy: false,
+                    failUnstable: false,
+                    maxNumberOfBuilds: 0,
+                    onlyStable: false,
+                    sourceEncoding: 'ASCII',
+                    zoomCoverageChart: false
+                  ])
+                }
+              }
+            }
+          },
+          "Test Database": {
+            node(label: 'linux') {
+              gitlabCommitStatus(name: 'Test Database') {
+                unstash 'Everything'
+                sh 'pg_prove -d webshop -v web-shop/test/sql/*.sql | tee tap.txt'
+                step([$class: 'TapPublisher',
+                  testResults: 'tap.txt'
+                ])
+              }
+            }
+          }
+        )
+      }
+    }
+    stage('SonarQube') {
+      steps {
+        node(label: 'linux') {
+          ws(dir: env.ws) {
+            gitlabCommitStatus(name: 'SonarQube') {
+              script {
+                def sonar = tool name: 'Local', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+              
+                withSonarQubeEnv {
+                  sh sonar + '/bin/sonar-scanner'
+                }
+                
+                def qg = waitForQualityGate()
+                if (qg.status != 'OK') {
+                  error "Pipeline aborted due to quality gate failure: ${qg.status}"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  post {
+    failure {
+      mail body: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+           Check console output at ${env.BUILD_URL}""",
+           subject: """FAILED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+           to: 'sander.rossel@gmail.com'
+    }
+    changed {
+        mail body: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]':
+             Check console output at ${env.BUILD_URL}""",
+             subject: """STATE CHANGED: Job '${env.JOB_NAME} [${env.BUILD_NUMBER}]'""",
+             to: 'sander.rossel@gmail.com'
+    }
+  }
+}

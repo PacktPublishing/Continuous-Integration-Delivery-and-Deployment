@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>CI Web Shop</title>
+        <link rel="shortcut icon" href="https://www.packtpub.com/favicon.ico">
+        
+        <!-- build:css -->
+        <link rel="stylesheet" type="text/css" href="..\node_modules\bootstrap\dist\css\bootstrap.css">
+        <link rel="stylesheet" type="text/css" href="..\css\layout.css">
+        <!-- endbuild -->
+        <!-- build:node_modules -->
+        <script src="..\node_modules\angular\angular.js"></script>
+        <script src="..\node_modules\jquery\dist\jquery.js"></script>
+        <script src="..\node_modules\bootstrap\dist\js\bootstrap.js"></script>
+        <!-- endbuild -->
+        <!-- build:js -->
+        <script src="..\scripts\bundles\product.bundle.js"></script>
+        <!-- endbuild -->
+    </head>
+    <body ng-app="shopApp">
+        <%- include navbar.ejs %>
+        <div class="container" ng-controller="productController">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <h2>{{product.name}}</h2>
+                    <p>
+                        <img src="http://placehold.it/300x300" alt="..." />
+                    </p>
+                    <p>{{product.description}}</p>
+                    <p>{{'&euro; ' + product.price}}</p>
+                    <p>
+                        <button ng-click="addToCart(product)" class="btn btn-primary">Buy</button>
+                    </p>
+                </div>
+            </div>
+            <footer class="footer">
+                <p>Copyright &copy; 2017</p>
+            </footer>
+        </div>
+    </body>
+</html>

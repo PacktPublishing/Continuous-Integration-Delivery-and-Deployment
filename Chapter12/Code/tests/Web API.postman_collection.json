@@ -1,0 +1,427 @@
+{
+	"variables": [],
+	"info": {
+		"name": "Web API",
+		"_postman_id": "a0daaf77-0317-36b6-a71f-96efef51641c",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get TODO 1",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Id equals 1\"] = jsonData.id === 1;",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{baseUrl}}/todo?id=1",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"todo"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "1",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"Add a new item to the TODO list.\"\n}"
+				},
+				"description": "Gets TODO item 1 and tests whether we got the correct item back."
+			},
+			"response": []
+		},
+		{
+			"name": "Create TODO default status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Description equals request description\"] = jsonData.description === \"Add a new item to the TODO list.\";",
+							"tests[\"Status equals 'New'\"] = jsonData.status === \"New\";",
+							"",
+							"postman.setEnvironmentVariable(\"createdId\", jsonData.id);",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{baseUrl}}/todo",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"Add a new item to the TODO list.\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get created TODO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Id equals \" + environment.createdId] = jsonData.id === +environment.createdId;",
+							"",
+							"tests[\"Description equals request description\"] = jsonData.description === \"Add a new item to the TODO list.\";",
+							"tests[\"Status equals 'New'\"] = jsonData.status === \"New\";",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{baseUrl}}/todo?id={{createdId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"todo"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{createdId}}",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"Add a new item to the TODO list.\"\n}"
+				},
+				"description": "Gets TODO item 1 and tests whether we got the correct item back."
+			},
+			"response": []
+		},
+		{
+			"name": "Create TODO \"In progress\" status",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Description equals request description\"] = jsonData.description === \"Add a new item to the TODO list.\";",
+							"tests[\"Status equals 'In progress'\"] = jsonData.status === \"In progress\";",
+							"",
+							"postman.setEnvironmentVariable(\"createdId\", jsonData.id);",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{baseUrl}}/todo",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"Add a new item to the TODO list.\",\n\t\"status\": \"In progress\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get created TODO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Id equals \" + environment.createdId] = jsonData.id === +environment.createdId;",
+							"",
+							"tests[\"Description equals request description\"] = jsonData.description === \"Add a new item to the TODO list.\";",
+							"tests[\"Status equals 'New'\"] = jsonData.status === \"In progress\";",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{baseUrl}}/todo?id={{createdId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"todo"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{createdId}}",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"Add a new item to the TODO list.\"\n}"
+				},
+				"description": "Gets TODO item 1 and tests whether we got the correct item back."
+			},
+			"response": []
+		},
+		{
+			"name": "Update TODO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Id equals \" + environment.createdId] = jsonData.id === +environment.createdId;",
+							"tests[\"Description equals request description\"] = jsonData.description === \"Add a new item to the TODO list using Postman.\";",
+							"tests[\"Status equals 'New'\"] = jsonData.status === \"Done\";",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{baseUrl}}/todo",
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": {{createdId}},\n\t\"description\": \"Add a new item to the TODO list using Postman.\",\n\t\"status\": \"Done\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get updated TODO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Id equals \" + environment.createdId] = jsonData.id === +environment.createdId;",
+							"tests[\"Description equals request description\"] = jsonData.description === \"Add a new item to the TODO list using Postman.\";",
+							"tests[\"Status equals 'New'\"] = jsonData.status === \"Done\";",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{baseUrl}}/todo?id={{createdId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"todo"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{createdId}}",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"Add a new item to the TODO list.\"\n}"
+				},
+				"description": "Gets TODO item 1 and tests whether we got the correct item back."
+			},
+			"response": []
+		},
+		{
+			"name": "Delete TODO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"var jsonData = JSON.parse(responseBody);",
+							"tests[\"Id equals \" + environment.createdId] = jsonData.id === +environment.createdId;",
+							"tests[\"Description equals request description\"] = jsonData.description === \"Add a new item to the TODO list using Postman.\";",
+							"tests[\"Status equals 'New'\"] = jsonData.status === \"Done\";",
+							"",
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 200\"] = responseCode.code === 200;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": "{{baseUrl}}/todo",
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"id\": {{createdId}}\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Get deleted TODO",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"type": "text/javascript",
+						"exec": [
+							"tests[\"Response time is less than a second\"] = responseTime < 1000;",
+							"tests[\"Status code is 404\"] = responseCode.code === 404;"
+						]
+					}
+				}
+			],
+			"request": {
+				"url": {
+					"raw": "{{baseUrl}}/todo?id={{createdId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"todo"
+					],
+					"query": [
+						{
+							"key": "id",
+							"value": "{{createdId}}",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"description\": \"Add a new item to the TODO list.\"\n}"
+				},
+				"description": "Gets TODO item 1 and tests whether we got the correct item back."
+			},
+			"response": []
+		}
+	]
+}
