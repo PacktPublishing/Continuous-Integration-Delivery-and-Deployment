@@ -1,7 +1,3 @@
-## [Get this title for $10 on Packt's Spring Sale](https://www.packt.com/B06308?utm_source=github&utm_medium=packt-github-repo&utm_campaign=spring_10_dollar_2022)
------
-For a limited period, all eBooks and Videos are only $10. All the practical content you need \- by developers, for developers
-
 # Continuous Integration, Delivery, and Deployment
 This is the code repository for [Continuous Integration, Delivery, and Deployment](https://www.packtpub.com/application-development/continuous-integration-delivery-and-deployment?utm_source=github&utm_medium=repository&utm_campaign=9781787286610), published by [Packt](https://www.packtpub.com/?utm_source=github). It contains all the supporting project files necessary to work through the book from start to finish.
 ## About the Book
